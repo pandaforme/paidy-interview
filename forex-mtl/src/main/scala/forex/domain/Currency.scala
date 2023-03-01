@@ -1,6 +1,7 @@
 package forex.domain
 
 import cats.Show
+import io.circe._
 
 sealed trait Currency
 
@@ -39,4 +40,13 @@ object Currency {
     case "USD" => USD
   }
 
+  implicit val encoder: Encoder[Currency] =
+    Encoder.instance[Currency] {
+      show.show _ andThen Json.fromString
+    }
+
+  implicit val decoder: Decoder[Currency] =
+    Decoder.instance[Currency] { c =>
+      c.as[String].fold(fa => Left(fa), fb => Right(fromString(fb)))
+    }
 }
