@@ -13,11 +13,10 @@ import org.http4s.client.Client
 import org.http4s.implicits._
 import org.http4s.server.middleware.{ AutoSlash, Timeout }
 
-class Module[F[_]: Concurrent: Timer](config: ApplicationConfig)(
-    implicit oneFrameEntityDecoder: EntityDecoder[F, List[OneFrame]],
-    resourceClient: Resource[F, Client[F]]
+class Module[F[_]: Concurrent: Timer](config: ApplicationConfig, resourceClient: Resource[F, Client[F]])(
+    implicit oneFrameEntityDecoder: EntityDecoder[F, List[OneFrame]]
 ) {
-  implicit val ratesService: RatesService[F] = RatesServiceInterpreters.live(config.oneFrame)
+  implicit val ratesService: RatesService[F] = RatesServiceInterpreters.live(config.oneFrame, resourceClient)
   implicit val cacheService: CacheService[F] = CacheServiceInterpreters.caffeineCache(config.cache)
 
   private val ratesProgram: RatesProgram[F] = RatesProgram[F]

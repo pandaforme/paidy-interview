@@ -17,20 +17,19 @@ object Main extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
     implicit val decoder: EntityDecoder[IO, List[OneFrame]] = jsonOf[IO, List[OneFrame]]
-    implicit val resourceClient                             = BlazeClientBuilder[IO](global).resource
+    val resourceClient                                      = BlazeClientBuilder[IO](global).resource
 
-    new Application[IO].stream(executionContext).compile.drain.as(ExitCode.Success)
+    new Application[IO].stream(executionContext, resourceClient).compile.drain.as(ExitCode.Success)
   }
 
 }
 
-class Application[F[_]: ConcurrentEffect: Timer](implicit oneFrameEntityDecoder: EntityDecoder[F, List[OneFrame]],
-                                                 resourceClient: Resource[F, Client[F]]) {
+class Application[F[_]: ConcurrentEffect: Timer](implicit oneFrameEntityDecoder: EntityDecoder[F, List[OneFrame]]) {
 
-  def stream(ec: ExecutionContext): Stream[F, Unit] =
+  def stream(ec: ExecutionContext, resourceClient: Resource[F, Client[F]]): Stream[F, Unit] =
     for {
       config <- Config.stream[F]("app")
-      module = new Module[F](config)
+      module = new Module[F](config, resourceClient)
       _ <- BlazeServerBuilder[F](ec)
             .bindHttp(config.http.port, config.http.host)
             .withHttpApp(module.httpApp)

@@ -15,10 +15,11 @@ import org.http4s.client.Client
 import org.http4s.client.middleware.{ Retry, RetryPolicy }
 import org.http4s.headers.Accept
 
-final case class OneFrameLive[F[_]: Concurrent: Timer](oneFrameConfig: OneFrameConfig)(
-    implicit oneFrameEntityDecoder: EntityDecoder[F, List[OneFrame]],
+final case class OneFrameLive[F[_]: Concurrent: Timer](
+    oneFrameConfig: OneFrameConfig,
     resourceClient: Resource[F, Client[F]]
-) extends Algebra[F] {
+)(implicit oneFrameEntityDecoder: EntityDecoder[F, List[OneFrame]])
+    extends Algebra[F] {
 
   override def get(pair: Rate.Pair): F[Either[ServiceError, Rate]] = resourceClient.use { client =>
     (for {
