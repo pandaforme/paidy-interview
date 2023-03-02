@@ -8,7 +8,7 @@ import scala.concurrent.duration.FiniteDuration
 
 case class ApplicationConfig(
     http: HttpConfig,
-    oneFrame: oneFrameConfig,
+    oneFrame: OneFrameConfig,
     cache: CacheConfig
 )
 
@@ -20,7 +20,7 @@ case class HttpConfig(
 
 final case class CacheConfig(maximumSize: Long Refined Positive, timeToLive: FiniteDuration)
 
-final case class oneFrameConfig(key: String,
+final case class OneFrameConfig(key: String,
                                 host: String Refined Url,
                                 maxWait: FiniteDuration,
                                 maxRetry: Int Refined Positive)

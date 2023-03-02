@@ -35,7 +35,7 @@ class Program[F[_]](
       request: Protocol.GetRatesRequest
   )(implicit M: Monad[F], RatesService: RatesService[F], CacheService: CacheService[F]): F[Either[ServiceError, Rate]] =
     (for {
-      rate <- EitherT(RatesService.get(Pair(request.from, request.to)))
+      rate <- EitherT(RatesService.get(Rate.Pair(request.from, request.to)))
       _ <- EitherT(CacheService.put(s"${request.from}${request.to}", rate.asJson.noSpaces))
     } yield {
       rate

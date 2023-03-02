@@ -2,35 +2,41 @@ package forex
 
 import cats.effect._
 import forex.config._
-import forex.services.cache.{ Interpreters => CacheServiceInterpreters }
-import forex.services.rates.{ Interpreters => RatesServiceInterpreters }
-import forex.services.{ CacheService, RatesService }
+import forex.domain.OneFrame
 import fs2.Stream
+import org.http4s.EntityDecoder
+import org.http4s.circe.jsonOf
+import org.http4s.client.Client
+import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.blaze.BlazeServerBuilder
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.global
 
 object Main extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
-    val config: ApplicationConfig               = Config.stream[IO]("app").compile.drain.asInstanceOf[ApplicationConfig]
-    implicit val ratesService: RatesService[IO] = RatesServiceInterpreters.live(config.oneFrame)
-    implicit val cacheService: CacheService[IO] = CacheServiceInterpreters.caffeineCache(config.cache)
+    implicit val decoder: EntityDecoder[IO, List[OneFrame]] = jsonOf[IO, List[OneFrame]]
+    implicit val resourceClient                             = BlazeClientBuilder[IO](global).resource
 
-    new Application[IO].stream(executionContext)(config).compile.drain.as(ExitCode.Success)
+    new Application[IO].stream(executionContext).compile.drain.as(ExitCode.Success)
   }
 
 }
 
-class Application[F[_]: ConcurrentEffect: Timer: RatesService: CacheService] {
+class Application[F[_]: ConcurrentEffect: Timer](implicit oneFrameEntityDecoder: EntityDecoder[F, List[OneFrame]],
+                                                 resourceClient: Resource[F, Client[F]]) {
 
-  def stream(ec: ExecutionContext): ApplicationConfig => Stream[F, Unit] =
-    config => {
-      val module: Module[F] = new Module[F](config)
-      BlazeServerBuilder[F](ec)
-        .bindHttp(config.http.port, config.http.host)
-        .withHttpApp(module.httpApp)
-        .serve
-        .map(_ => ())
+  def stream(ec: ExecutionContext): Stream[F, Unit] =
+    for {
+      config <- Config.stream[F]("app")
+      module = new Module[F](config)
+      _ <- BlazeServerBuilder[F](ec)
+            .bindHttp(config.http.port, config.http.host)
+            .withHttpApp(module.httpApp)
+            .serve
+    } yield {
+      ()
     }
+
 }

@@ -3,8 +3,8 @@ import sbt._
 object Dependencies {
 
   object Versions {
-    val cats       = "2.5.0"
-    val catsEffect = "2.4.1"
+    val cats       = "2.9.0"
+    val catsEffect = "2.5.3"
     val fs2        = "2.5.4"
     val http4s     = "0.21.22"
     val circe      = "0.13.0"
@@ -12,11 +12,12 @@ object Dependencies {
     val refined    = "0.10.1"
     val scaffeine  = "5.2.1"
 
-    val kindProjector  = "0.10.3"
-    val logback        = "1.2.3"
-    val scalaCheck     = "1.15.3"
-    val scalaTest      = "3.2.7"
-    val catsScalaCheck = "0.3.0"
+    val kindProjector     = "0.10.3"
+    val logback           = "1.2.3"
+    val scalaCheck        = "1.15.3"
+    val scalaTest         = "3.2.7"
+    val catsScalaCheck    = "0.3.0"
+    val catsEffectTesting = "1.5.0"
   }
 
   object Libraries {
@@ -47,9 +48,10 @@ object Dependencies {
     lazy val logback = "ch.qos.logback" % "logback-classic" % Versions.logback
 
     // Test
-    lazy val scalaTest      = "org.scalatest"     %% "scalatest"       % Versions.scalaTest
-    lazy val scalaCheck     = "org.scalacheck"    %% "scalacheck"      % Versions.scalaCheck
-    lazy val catsScalaCheck = "io.chrisdavenport" %% "cats-scalacheck" % Versions.catsScalaCheck
+    lazy val scalaTest         = "org.scalatest"     %% "scalatest"                     % Versions.scalaTest
+    lazy val scalaCheck        = "org.scalacheck"    %% "scalacheck"                    % Versions.scalaCheck
+    lazy val catsEffectTesting = "org.typelevel"     %% "cats-effect-testing-scalatest" % Versions.catsEffectTesting
+    lazy val catsScalaCheck    = "io.chrisdavenport" %% "cats-scalacheck"               % Versions.catsScalaCheck
   }
 
 }

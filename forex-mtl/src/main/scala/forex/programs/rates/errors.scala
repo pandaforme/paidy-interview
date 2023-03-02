@@ -14,5 +14,6 @@ object errors {
     case ServiceError.DecodeJsonFailed(msg)     => ProgramError.RateLookupFailed(msg)
     case ServiceError.CacheFailed(throwable)    => ProgramError.RateLookupFailed(throwable.getMessage)
     case ServiceError.WrongUrl(msg)             => ProgramError.RateLookupFailed(msg)
+    case ServiceError.EmptyResult               => ProgramError.RateLookupFailed("Could not find any result")
   }
 }

@@ -8,6 +8,7 @@ object errors {
     final case class DecodeJsonFailed(msg: String) extends ServiceError
     final case class CacheFailed(throwable: Throwable) extends ServiceError
     final case class WrongUrl(msg: String) extends ServiceError
+    final case object EmptyResult extends ServiceError
   }
 
 }

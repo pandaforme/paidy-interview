@@ -1,6 +1,7 @@
 package forex.domain
 
 import cats.Show
+import cats.syntax.either._
 import io.circe._
 
 sealed trait Currency
@@ -47,6 +48,6 @@ object Currency {
 
   implicit val decoder: Decoder[Currency] =
     Decoder.instance[Currency] { c =>
-      c.as[String].fold(fa => Left(fa), fb => Right(fromString(fb)))
+      c.as[String].fold(fa => fa.asLeft, fb => fromString(fb).asRight)
     }
 }

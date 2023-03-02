@@ -1,20 +1,29 @@
 package forex.services.cache
 
-import cats.Id
-import cats.effect.IO
+import cats.Applicative
+import cats.effect.Concurrent
+import com.github.blemale.scaffeine
 import com.github.blemale.scaffeine.Scaffeine
+import forex.config.CacheConfig
 import forex.services.cache.interpreters.{ CaffeineCache, MemoryCache }
-import eu.timepit.refined.auto._
 
-object Interpreters {
-  def mapCache: Algebra[Id] = MemoryCache()
+import scala.collection.mutable
 
-  def caffeineCache(cacheConfig: forex.config.CacheConfig): Algebra[IO] = {
-    val caffeine = Scaffeine()
+object Cache {
+  val memoryCache: mutable.Map[String, String] = scala.collection.mutable.Map.empty
+
+  def caffeineCache(cacheConfig: CacheConfig): scaffeine.Cache[String, String] =
+    Scaffeine()
       .recordStats()
       .expireAfterWrite(cacheConfig.timeToLive)
-      .maximumSize(cacheConfig.maximumSize)
+      .maximumSize(cacheConfig.maximumSize.value)
       .build[String, String]()
-    CaffeineCache(caffeine)
-  }
+}
+
+object Interpreters {
+  def memoryCache[F[_]: Applicative]: Algebra[F] =
+    MemoryCache(Cache.memoryCache)
+
+  def caffeineCache[F[_]: Concurrent](cacheConfig: forex.config.CacheConfig): Algebra[F] =
+    CaffeineCache(Cache.caffeineCache(cacheConfig))
 }
