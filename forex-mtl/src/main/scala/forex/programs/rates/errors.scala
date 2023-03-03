@@ -7,6 +7,7 @@ object errors {
   sealed trait ProgramError extends Exception
   object ProgramError {
     final case class RateLookupFailed(msg: String) extends ProgramError
+    final case object EmptyResult extends ProgramError
   }
 
   def toProgramError(error: ServiceError): ProgramError = error match {
@@ -14,6 +15,6 @@ object errors {
     case ServiceError.DecodeJsonFailed(msg)     => ProgramError.RateLookupFailed(msg)
     case ServiceError.CacheFailed(throwable)    => ProgramError.RateLookupFailed(throwable.getMessage)
     case ServiceError.WrongUrl(msg)             => ProgramError.RateLookupFailed(msg)
-    case ServiceError.EmptyResult               => ProgramError.RateLookupFailed("Could not find any result")
+    case ServiceError.EmptyResult               => ProgramError.EmptyResult
   }
 }

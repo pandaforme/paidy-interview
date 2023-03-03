@@ -4,7 +4,7 @@ package rates
 import forex.domain._
 import io.circe._
 import io.circe.generic.extras.Configuration
-import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
+import io.circe.generic.extras.semiauto.{ deriveConfiguredDecoder, deriveConfiguredEncoder }
 
 object Protocol {
 
@@ -25,4 +25,6 @@ object Protocol {
   implicit val responseEncoder: Encoder[GetApiResponse] =
     deriveConfiguredEncoder[GetApiResponse]
 
+  implicit val responseDecoder: Decoder[GetApiResponse] =
+    deriveConfiguredDecoder[GetApiResponse]
 }
