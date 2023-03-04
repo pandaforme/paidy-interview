@@ -8,6 +8,7 @@ object errors {
   object ProgramError {
     final case class RateLookupFailed(msg: String) extends ProgramError
     final case object EmptyResult extends ProgramError
+    final case object InvalidPair extends ProgramError
   }
 
   def toProgramError(error: ServiceError): ProgramError = error match {
@@ -16,5 +17,6 @@ object errors {
     case ServiceError.CacheFailed(throwable)    => ProgramError.RateLookupFailed(throwable.getMessage)
     case ServiceError.WrongUrl(msg)             => ProgramError.RateLookupFailed(msg)
     case ServiceError.EmptyResult               => ProgramError.EmptyResult
+    case ServiceError.InvalidPair               => ProgramError.InvalidPair
   }
 }

@@ -4,8 +4,8 @@ package rates
 import cats.effect.Sync
 import cats.syntax.flatMap._
 import forex.programs.RatesProgram
-import forex.programs.rates.errors.ProgramError.{ EmptyResult, RateLookupFailed }
-import forex.programs.rates.{ Protocol => RatesProgramProtocol }
+import forex.programs.rates.errors.ProgramError.{EmptyResult, InvalidPair, RateLookupFailed}
+import forex.programs.rates.{Protocol => RatesProgramProtocol}
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.Router
@@ -26,6 +26,7 @@ class RatesHttpRoutes[F[_]: Sync](rates: RatesProgram[F]) extends Http4sDsl[F] {
           case Right(r)                    => Ok(r.asGetApiResponse)
           case Left(RateLookupFailed(msg)) => InternalServerError(msg)
           case Left(EmptyResult)           => NotFound()
+          case Left(InvalidPair)           => BadRequest()
         }
   }
 

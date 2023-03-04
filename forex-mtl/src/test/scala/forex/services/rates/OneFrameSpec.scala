@@ -7,7 +7,7 @@ import eu.timepit.refined.auto._
 import forex.config.OneFrameConfig
 import forex.domain.{ Currency, OneFrame, Rate }
 import forex.services.errors.ServiceError
-import forex.services.errors.ServiceError.{ DecodeJsonFailed, OneFrameLookupFailed }
+import forex.services.errors.ServiceError.{ DecodeJsonFailed, InvalidPair, OneFrameLookupFailed }
 import forex.services.rates.Interpreters
 import org.http4s.circe.jsonOf
 import org.http4s.client.Client
@@ -34,7 +34,7 @@ class OneFrameSpec extends AsyncFlatSpec with Matchers {
     )
     val oneFrame = Interpreters.live[IO](config, resourceClient)
     val result = for {
-      r <- EitherT(oneFrame.get(Rate.Pair(Currency.USD, Currency.EUR)))
+      r <- EitherT(oneFrame.get(Rate.Pair(Currency.USD, Currency.JPY)))
     } yield { r }
 
     result.value
@@ -74,7 +74,7 @@ class OneFrameSpec extends AsyncFlatSpec with Matchers {
       .unsafeToFuture()
   }
 
-  it should "retry when oneframe service is timeout" in {
+  it should "retry when One-Frame service is timeout" in {
     val config = OneFrameConfig("api key", "http://test.com", 1 minutes, 3)
 
     val result: IO[(Either[ServiceError, Rate], Int)] = for {
@@ -96,6 +96,33 @@ class OneFrameSpec extends AsyncFlatSpec with Matchers {
         case (Left(OneFrameLookupFailed(_)), 4) => assert(true)
         case _                                  => assert(false)
       }
+      .unsafeToFuture()
+  }
+
+  it should "return InvalidPair" in {
+    val config = OneFrameConfig("api key", "http://test.com", 1 minutes, 1)
+
+    val resourceClient: Resource[IO, Client[IO]] = httpClient(
+      """[{"from":"USD","to":"JPY","bid":0.6118225421857174,"ask":0.8243869101616611,"price":0.71810472617368925,"time_stamp":"2023-03-02T06:22:53.478Z"}]""",
+      Status.Ok
+    )
+    val oneFrame = Interpreters.live[IO](config, resourceClient)
+    val result = for {
+      r <- EitherT(oneFrame.get(Rate.Pair(Currency.UNSUPPORTED_CURRENCY, Currency.JPY)))
+    } yield {
+      r
+    }
+
+    result.value
+      .map(
+        _.fold(
+          {
+            case InvalidPair => assert(true)
+            case _ => assert(false)
+          },
+          _ => assert(false)
+        )
+      )
       .unsafeToFuture()
   }
 

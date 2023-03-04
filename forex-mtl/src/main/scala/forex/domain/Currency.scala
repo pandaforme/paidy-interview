@@ -16,17 +16,19 @@ object Currency {
   case object JPY extends Currency
   case object SGD extends Currency
   case object USD extends Currency
+  case object UNSUPPORTED_CURRENCY extends Currency
 
   implicit val show: Show[Currency] = Show.show {
-    case AUD => "AUD"
-    case CAD => "CAD"
-    case CHF => "CHF"
-    case EUR => "EUR"
-    case GBP => "GBP"
-    case NZD => "NZD"
-    case JPY => "JPY"
-    case SGD => "SGD"
-    case USD => "USD"
+    case AUD                  => "AUD"
+    case CAD                  => "CAD"
+    case CHF                  => "CHF"
+    case EUR                  => "EUR"
+    case GBP                  => "GBP"
+    case NZD                  => "NZD"
+    case JPY                  => "JPY"
+    case SGD                  => "SGD"
+    case USD                  => "USD"
+    case UNSUPPORTED_CURRENCY => "UNSUPPORTED_CURRENCY"
   }
 
   def fromString(s: String): Currency = s.toUpperCase match {
@@ -39,6 +41,7 @@ object Currency {
     case "JPY" => JPY
     case "SGD" => SGD
     case "USD" => USD
+    case _     => UNSUPPORTED_CURRENCY
   }
 
   implicit val encoder: Encoder[Currency] =

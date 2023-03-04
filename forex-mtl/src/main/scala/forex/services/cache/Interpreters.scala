@@ -10,7 +10,7 @@ import forex.services.cache.interpreters.{ CaffeineCache, MemoryCache }
 import scala.collection.mutable
 
 object Cache {
-  val memoryCache: mutable.Map[String, String] = scala.collection.mutable.Map.empty
+  def memoryCache: mutable.Map[String, String] = scala.collection.mutable.Map.empty
 
   def caffeineCache(cacheConfig: CacheConfig): scaffeine.Cache[String, String] =
     Scaffeine()

@@ -7,7 +7,7 @@ import forex.http.rates.Protocol.GetApiResponse
 import forex.programs.RatesProgram
 import forex.programs.rates.Protocol.GetRatesRequest
 import forex.programs.rates.errors.ProgramError
-import forex.programs.rates.errors.ProgramError.{ EmptyResult, RateLookupFailed }
+import forex.programs.rates.errors.ProgramError.{ EmptyResult, InvalidPair, RateLookupFailed }
 import org.http4s.circe.jsonOf
 import org.http4s.implicits.http4sLiteralsSyntax
 import org.http4s.{ EntityDecoder, Method, Request, Status }
@@ -56,6 +56,24 @@ class RatesHttpRoutesSpec extends AsyncFlatSpec with Matchers {
       response match {
         case Some(s) =>
           s.status shouldBe Status.NotFound
+        case None => assert(false)
+      }
+    }).unsafeToFuture()
+  }
+
+  it should "return BadRequest" in {
+    val ratesProgram = new RatesProgram[IO] {
+      override def get(request: GetRatesRequest): IO[Either[ProgramError, Rate]] = IO.pure(InvalidPair.asLeft)
+    }
+
+    (for {
+      response <- new RatesHttpRoutes[IO](ratesProgram)
+                   .routes(Request(method = Method.GET, uri = uri"/rates?from=TWD&to=JPY"))
+                   .value
+    } yield {
+      response match {
+        case Some(s) =>
+          s.status shouldBe Status.BadRequest
         case None => assert(false)
       }
     }).unsafeToFuture()

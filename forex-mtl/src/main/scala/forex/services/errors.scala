@@ -9,6 +9,7 @@ object errors {
     final case class CacheFailed(throwable: Throwable) extends ServiceError
     final case class WrongUrl(msg: String) extends ServiceError
     final case object EmptyResult extends ServiceError
+    final case object InvalidPair extends ServiceError
   }
 
 }

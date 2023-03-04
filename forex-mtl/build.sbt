@@ -80,5 +80,5 @@ dockerBaseImage := "adoptopenjdk/openjdk16"
 Compile / mainClass := Some("forex.Main")
 Docker / packageName := "paidy/forex"
 dockerExposedPorts ++= Seq(8888, 8888)
-dockerEnvVars ++= Map(("HTTP_PORT", "8888"), ("ONE_FRAME_KEY", "10dc303535874aeccc86a8251e6992f5"), ("ONE_FRAME_HOST", "httP://localhost:8080"))
+dockerEnvVars ++= Map(("HTTP_PORT", "8888"), ("ONE_FRAME_KEY", "10dc303535874aeccc86a8251e6992f5"), ("ONE_FRAME_HOST", "http://localhost:8080"))
 

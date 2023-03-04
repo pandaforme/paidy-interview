@@ -6,8 +6,9 @@ import cats.syntax.either._
 import cats.syntax.functor._
 import eu.timepit.refined.auto._
 import forex.config.OneFrameConfig
+import forex.domain.Currency.UNSUPPORTED_CURRENCY
 import forex.domain.{ OneFrame, Rate }
-import forex.services.errors.ServiceError.{ DecodeJsonFailed, EmptyResult, OneFrameLookupFailed, WrongUrl }
+import forex.services.errors.ServiceError._
 import forex.services.errors._
 import forex.services.rates.Algebra
 import org.http4s._
@@ -23,6 +24,13 @@ final case class OneFrameLive[F[_]: Concurrent: Timer](
 
   override def get(pair: Rate.Pair): F[Either[ServiceError, Rate]] = resourceClient.use { client =>
     (for {
+      _ <- EitherT.fromEither[F] {
+            (pair.from, pair.to) match {
+              case (UNSUPPORTED_CURRENCY, _)                    => InvalidPair.asLeft
+              case (_, UNSUPPORTED_CURRENCY)                    => InvalidPair.asLeft
+              case (_, _)                                       => pair.asRight
+            }
+          }
       uri <- EitherT.fromEither[F](
               Uri
                 .fromString(s"${oneFrameConfig.host}/rates?pair=${pair.from}${pair.to}")

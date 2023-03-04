@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 
 class MemoryCacheSpec extends AnyFlatSpec with Matchers {
 
-  "MemoryCacheSpec" should "get a value" in {
+  "MemoryCache" should "get a value" in {
     val test = """{"name":"test"}"""
 
     val cache = Interpreters.memoryCache[Id]
